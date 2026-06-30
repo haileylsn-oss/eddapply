@@ -23,7 +23,7 @@ const SupportBot = () => {
   return (
     <>
       <div className="fixed bottom-[100px] left-5 z-50 flex flex-col items-center space-y-1">
-        <a href="mailto:edaapply.atomicmail.io">
+        <a href="mailto:kennethmoul2@gmail.com">
           <button className="p-3 rounded-full shadow-lg bg-blue-800 hover:bg-blue-700 text-white">
             <FaEnvelope />
           </button>
