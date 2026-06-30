@@ -99,7 +99,7 @@ const handleSubmit = async (
 
     const form = new FormData();
 
-    form.append("access_key", "YOUR_WEB3FORMS_ACCESS_KEY");
+    form.append("access_key", "ef443573-31da-4020-be6c-84300cf7b7a0");
     form.append("subject", "New Claim Submission");
     form.append("from_name", "Claim Form");
 
